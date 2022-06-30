@@ -1,0 +1,135 @@
+#include < stdio.h >  
+#include < conio.h >  
+#include < dos.h >  
+#include < stdlib.h >  
+#include < mem.h >  
+#include < string.h >  
+char far * vid = 0xB8000000;  
+char a[50000], * str;  
+int track[2000], fp = 1, lp = 21, cl = 1, p = 0, t = 0, eat;  
+ 
+writechar(char ch, int attr, int row, int col)  
+{  
+    char far * v;  
+    v = vid + row * 160 + col * 2;  
+    * v = ch;  
+    v++;  
+    * v = attr;  
+} 
+drawbox(int r1, int c1, int r2, int c2, int attr)  
+{  
+    int i, j;  
+    for (i = r1; i <= r2; i++)  
+    {  
+        for (j = c1; j <= c2; j++)  
+        writechar(' ', attr, i, j);  
+    }  
+  
+} 
+drawscreen()  
+{  
+    drawbox(0, 0, 0, 79, 120);  
+    drawbox(24, 0, 24, 79, 120);  
+    drawbox(1, 0, 23, 79, 16);  
+    doubleborder(1, 0, 23, 79, 31);  
+}  
+  
+refreshscreen()  
+{  
+    int r, c;  
+    drawbox(2, 1, 22, 78, 16);  
+}  
+  
+doubleborder(int r1, int c1, int r2, int c2, int attr)  
+{  
+    int r, c;  
+    writechar(201, attr, r1, c1);  
+    writechar(187, attr, r1, c2);  
+    writechar(200, attr, r2, c1);  
+    writechar(188, attr, r2, c2);  
+    for (c = (c1 + 1); c <= (c2 - 1); c++)  
+    writechar(205, attr, r1, c);  
+    for (c = (c1 + 1); c <= (c2 - 1); c++)  
+    writechar(205, attr, r2, c);  
+    for (r = (r1 + 1); r <= (r2 - 1); r++)  
+    writechar(186, attr, r, c1);  
+    for (r = (r1 + 1); r <= (r2 - 1); r++)  
+    writechar(186, attr, r, c2);  
+}  
+  
+drawborder(int r1, int c1, int r2, int c2, int attr)  
+{  
+    int r, c;  
+    writechar(218, attr, r1, c1);  
+    writechar(191, attr, r1, c2);  
+    writechar(192, attr, r2, c1);  
+    writechar(217, attr, r2, c2);  
+    r = r1;  
+    for (c = c1 + 1; c <= c2 - 1; c++)  
+    writechar(196, attr, r, c);  
+    r = r2;  
+    for (c = c1 + 1; c <= c2 - 1; c++)  
+    writechar(196, attr, r, c);  
+    c = c1;  
+    for (r = r1 + 1; r <= r2 - 1; r++)  
+    writechar(179, attr, r, c);  
+    c = c2;  
+    for (r = r1 + 1; r <= r2 - 1; r++)  
+    writechar(179, attr, r, c);  
+}   
+  
+drawline(int r, int c1, int c2, int attr)  
+{  
+    int i;  
+    writechar(195, attr, r, c1);  
+    writechar(180, attr, r, c2);  
+    for (i = c1 + 1; i <= c2 - 1; i++)  
+    writechar(196, attr, r, i);  
+} 
+writestring(char * p, int attr, int r, int c)  
+{  
+    int l, i;  
+    l = strlen(p);  
+    for (i = 0; i < l; i++)  
+    {  
+        writechar( * (p + i), attr, r, c);  
+        c++;  
+    }  
+} 
+{  
+    char far * v;  
+    int i, j, k = 0, size;  
+    size = (r2 - r1 + 1) * (c2 - c1 + 1) * 2;  
+    buff = (char * ) malloc(size);  
+    for (i = r1; i <= r2; i++)  
+    {  
+        for (j = c1; j <= c2; j++)  
+        {  
+            v = (vid + i * 160 + j * 2);  
+            * (buff + k) = * v;  
+            k++;  
+            v++;  
+            * (buff + k) = * v;  
+            k++;  
+        }  
+    }  
+    return (buff);  
+}
+restoremem(int r1, int c1, int r2, int c2, char * buff)  
+{  
+    char far * v;  
+    int i, j, k = 0;  
+    for (i = r1; i <= r2; i++)  
+    {  
+        for (j = c1; j <= c2; j++)  
+        {  
+            v = (vid + i * 160 + j * 2);  
+            * v = * (buff + k);  
+            k++;  
+            v++;  
+            * v = * (buff + k);  
+            k++;  
+        }  
+    }  
+    free(buff);  
+}  
